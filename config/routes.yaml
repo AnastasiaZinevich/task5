@@ -3,3 +3,21 @@ controllers:
         path: ../src/Controller/
         namespace: App\Controller
     type: attribute
+
+app_user_index:
+    path: /
+    controller: 'App\Controller\UserController::index'
+
+translations:
+    path: /translations/{filename}
+    controller: App\Controller\TranslationController::loadTranslation
+
+homepage:
+    path: /
+    controller: App\Controller\UserController::index
+
+
+export_to_csv:
+    path: /export-to-csv
+    controller: App\Controller\UserController::exportToCsv
+    methods: [GET, POST]  # Добавляем метод POST

@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="utf-8"?>
+<xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" version="1.2">
+  <file source-language="en" target-language="pl" datatype="plaintext" original="file.ext">
+    <header>
+      <tool tool-id="symfony" tool-name="Symfony"/>
+    </header>
+    <body>
+      <trans-unit id="vYLPFmm" resname="Number">
+        <source>Number</source>
+        <target>Numer</target>
+      </trans-unit>
+      <trans-unit id="VyKtU.N" resname="Random_identifier">
+        <source>Random_identifier</source>
+        <target>Losowy identyfikator</target>
+      </trans-unit>
+      <trans-unit id="4uumpXG" resname="Full_name">
+        <source>Full_name</source>
+        <target>Imię i nazwisko</target>
+      </trans-unit>
+      <trans-unit id="Vu_PIJV" resname="Address">
+        <source>Address</source>
+        <target>Adres</target>
+      </trans-unit>
+      <trans-unit id="Y9zriAC" resname="Phone">
+        <source>Phone</source>
+        <target>Telefon</target>
+      </trans-unit>
+      <trans-unit id="hiTIggC" resname="Номер">
+        <source>Номер</source>
+        <target>__Номер</target>
+      </trans-unit>
+      <trans-unit id="enfvcsm" resname="Случайный идентификатор">
+        <source>Случайный идентификатор</source>
+        <target>__Случайный идентификатор</target>
+      </trans-unit>
+      <trans-unit id="vTkcV7C" resname="ФИО">
+        <source>ФИО</source>
+        <target>__ФИО</target>
+      </trans-unit>
+      <trans-unit id="2oLoBWP" resname="Адрес">
+        <source>Адрес</source>
+        <target>__Адрес</target>
+      </trans-unit>
+      <trans-unit id="gi_f2bo" resname="Телефон">
+        <source>Телефон</source>
+        <target>__Телефон</target>
+      </trans-unit>
+    </body>
+  </file>
+</xliff>

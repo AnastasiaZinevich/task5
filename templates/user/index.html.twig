@@ -1,0 +1,441 @@
+{# templates/user/index.html.twig #}
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.7.2/font/bootstrap-icons.css" rel="stylesheet">
+    <title>Fake user generator</title>
+    
+ <style>
+    body {
+        background-color: #f8f9fa;
+        color: #343a40;
+        font-family: Arial, sans-serif;
+        margin-top: 50px;
+    }
+
+    .container {
+        max-width: 800px;
+        margin: 0 auto;
+        padding: 20px;
+        background-color: #fff;
+        border-radius: 10px;
+        box-shadow: 0px 0px 20px rgba(0, 0, 0, 0.1);
+    }
+
+    h1 {
+        
+        margin-bottom: 20px;
+    }
+  .form-inline label {
+            font-weight: bold;
+            margin-right: 10px;
+        }
+
+        .form-inline .form-control {
+            width: 150px;
+            padding: 8px;
+            border-radius: 4px;
+            border: 1px solid #ccc;
+        }
+
+        .form-inline button {
+            font-weight: bold;
+            padding: 8px 12px;
+            background-color: #007bff;
+            color: #fff;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        .form-inline button:hover {
+            background-color: #0056b3;
+        }
+    form {
+        margin-bottom: 20px;
+    }
+
+    .form-group {
+        margin-bottom: 20px;
+    }
+
+    label {
+        font-weight: bold;
+    }
+
+    table {
+        width: 100%;
+        border-collapse: collapse;
+        border-radius: 10px;
+        overflow: hidden;
+        margin-bottom: 20px;
+    }
+
+    th, td {
+        padding: 12px 15px;
+        text-align: left;
+        border-bottom: 1px solid #dee2e6;
+    }
+
+    th {
+        background-color: #f8f9fa;
+        border-top: 2px solid #dee2e6;
+    }
+
+    tbody tr:nth-child(even) {
+        background-color: #f2f2f2;
+    }
+
+    tbody tr:hover {
+        background-color: #e9ecef;
+    }
+
+    /* Стили для контейнера таблицы с фиксированной высотой и скроллом */
+    .scrollable {
+        max-height: 400px;
+        overflow-y: auto;
+    }
+</style>
+</head>
+<body>
+   <h1>Fake User Generator</h1>
+<div class="d-flex align-items-center justify-content-center">
+    <form id="generatorForm" class="form-inline" method="GET" action="">
+        <label class="mr-2" for="region">{{ 'Region'|trans }}:</label>
+        <select class="form-control mr-2" name="region" id="region">
+            <option value="USA" data-lang="en">{{ 'USA'|trans }}</option>
+            <option value="Poland" data-lang="pl">{{ 'Poland'|trans }}</option>
+            <option value="China" data-lang="zh">{{ 'China'|trans }}</option>
+            <option value="Russia" data-lang="ru">{{ 'Russia'|trans }}</option>
+            <option value="Korea" data-lang="ko">{{ 'South Korea'|trans }}</option>
+            <option value="Georgia" data-lang="ka">{{ 'Georgia'|trans }}</option>
+            <!-- Add other regions of your choice -->
+        </select>
+        <label class="mr-2" for="error_count" style="
+    margin-left: 20px;">{{ 'Error Count'|trans }}:</label>
+        <input class="form-control mr-2" type="range" name="error_count" id="error_count" min="0" max="10" step="0.25" value="0" style="
+    top: 10px;
+    position: relative;">
+        <input class="form-control mr-2"  type="number" name="error_count_input" id="error_count_input" min="0" max="1000" value="0">
+        <label class="mr-2" for="seed" style="margin-left: 20px;">{{ 'Seed'|trans }}:</label>
+        <input class="form-control mr-2" type="text" name="seed" id="seed" value="">
+        <button type="button" class="btn btn-primary mr-2" id="randomSeed">Random<i class="fas fa-random"></i></button>
+       
+    </form>
+</div>
+<button id="exportCsvButton" style=" font-weight: bold;
+            padding: 8px 12px;
+            background-color: #007bff;
+            color: #fff;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;">Export to CSV</button>
+
+<hr>
+<div id="userData" class="scrollable">
+    <table>
+        <thead>
+            <tr>
+                <th>{{ 'Number'|trans }}</th>
+                <th>{{ 'Random Identifier'|trans }}</th>
+                <th>{{ 'Full Name'|trans }}</th>
+                <th>{{ 'Address'|trans }}</th>
+                <th>{{ 'Phone'|trans }}</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for user in users %}
+            <tr>
+                <td>{{ loop.index }}</td>
+                <td>{{ user.id }}</td>
+                <td>{{ user.name|trans }}</td>
+                <td>{{ user.address|trans }}</td>
+                <td>{{ user.phone|trans }}</td>
+            </tr>
+            {% endfor %}
+            <input type="hidden" id="loadedRecords" name="loadedRecords" value="0">
+        </tbody>
+    </table>
+</div>
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            var errorCountInput = document.getElementById('error_count_input');
+
+            errorCountInput.addEventListener('input', function () {
+                if (errorCountInput.value > 1000) {
+                    errorCountInput.value = 1000;
+                }
+            });
+        });
+    </script>
+<script>
+$(document).ready(function() {
+    var fetchingData = false; // Переменная для отслеживания состояния запроса данных
+    var offset = 0; // Смещение для загрузки следующей порции записей
+    var limit = 10; // Лимит записей для каждой порции
+
+    // Функция для обновления таблицы с данными
+    function updateTable(users) {
+        var tableBody = $('#userData tbody');
+        if (!tableBody.length) {
+            tableBody = $('<tbody></tbody>');
+            $('#userData').append(tableBody);
+        }
+        if (users.length > 0) {
+            $.each(users, function(index, user) {
+                var row = '<tr>' +
+                    '<td>' + (index + 1 + offset) + '</td>' +
+                    '<td>' + user.id + '</td>' +
+                    '<td>' + user.name + '</td>' +
+                    '<td>' + user.address + '</td>' +
+                    '<td>' + user.phone + '</td>' +
+                    '</tr>';
+                tableBody.append(row); // Добавить новую строку в таблицу
+            });
+            offset += users.length; // Увеличить смещение на количество загруженных записей
+        } else {
+            // Если данных больше нет, можно скрыть скроллбар или добавить некоторый индикатор
+            $('#userData').css('overflow-y', 'hidden');
+            fetchingData = true; // Установить флаг, чтобы загрузка не происходила при последующих прокрутках
+        }
+    }
+
+    function loadMoreData() {
+        var table = $('#userData');
+
+        if (table.scrollTop() + table.innerHeight() >= table[0].scrollHeight - 20 && !fetchingData) {
+            fetchingData = true;
+            var formData = $('#generatorForm').serialize();
+            formData += '&offset=' + offset;
+            formData += '&limit=' + limit;
+
+            offset = 0;
+
+            $.ajax({
+                type: 'GET',
+                url: '/', // Замените на URL-адрес контроллера Symfony
+                data: formData,
+                success: function(response) {
+                    updateTable(response.users);
+                    fetchingData = false;
+                },
+                error: function(xhr, status, error) {
+                    console.error('Ошибка при загрузке данных:', error);
+                    fetchingData = false;
+                }
+            });
+        }
+    }
+
+    // Обработка прокрутки таблицы
+    $('#userData').scroll(function() {
+        loadMoreData();
+    });
+
+    // Загрузить первую порцию данных при загрузке страницы
+    loadMoreData();
+});
+
+
+
+  
+
+
+</script>
+ <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            var seedInput = document.getElementById('seed');
+
+            seedInput.addEventListener('input', function () {
+                seedInput.value = seedInput.value.replace(/[^0-9]/g, '');
+            });
+        });
+    </script>
+<script>
+  $(document).ready(function() {
+    // Обработка изменения значения в поле региона
+    $('#region').change(function() {
+      var selectedRegion = $(this).val();
+      var selectedLang = $(this).find(':selected').data('lang');
+      changeLanguage(selectedLang); // Изменить язык
+      fetchUserData(selectedRegion); // Запросить данные для выбранного региона
+    });
+
+    // Обработка изменения значений полей, отличных от региона
+    $('#generatorForm').find('input[type!="radio"], select').not('#region').on('input change', function() {
+      fetchUserData(); // Вызвать функцию для отправки AJAX-запроса и обновления таблицы
+    });
+
+    // Обработка клика по кнопке "Random" для генерации случайного seed
+    $('#randomSeed').click(function() {
+      generateRandomSeed(); // Вызвать функцию для генерации случайного сида
+      fetchUserData(); // Вызвать функцию для отправки AJAX-запроса и обновления таблицы
+    });
+
+    // Функция для генерации случайного сида
+    function generateRandomSeed() {
+      var randomSeed = Math.floor(Math.random() * 1000000);
+      $('#seed').val(randomSeed);
+    }
+
+    // Функция для изменения языка
+    function changeLanguage(lang) {
+      $.getJSON('/translations/' + lang + '.json', function(translations) {
+        $('[data-translate]').each(function() {
+          var translationKey = $(this).data('translate');
+          var translation = translations[translationKey];
+          if (translation) {
+            $(this).text(translation);
+          }
+        });
+      });
+    }
+
+    // Функция для отправки AJAX-запроса и обновления таблицы с данными
+    function fetchUserData(region) {
+      var formData = $('#generatorForm').serialize(); // Получить данные формы в виде строки
+      if (region) {
+        formData += '&region=' + region; // Добавить выбранный регион в данные формы
+      }
+      $.ajax({
+        type: 'GET',
+        url: '/', // URL-адрес контроллера Symfony
+        data: formData, // Данные формы
+        success: function(response) {
+          updateTable(response.users); // Обновить таблицу с данными
+        },
+        error: function(xhr, status, error) {
+          console.error('Ошибка при загрузке данных:', error);
+        }
+      });
+    }
+
+    // Функция для обновления таблицы с данными
+    function updateTable(users) {
+      var tableBody = $('#userData tbody');
+      tableBody.empty(); // Очистить текущие данные в таблице
+      $.each(users, function(index, user) {
+        var row = '<tr>' +
+          '<td>' + (index + 1) + '</td>' +
+          '<td>' + user.id + '</td>' +
+          '<td data-translate="name">' + user.name + '</td>' +
+          '<td data-translate="address">' + user.address + '</td>' +
+          '<td data-translate="phone">' + user.phone + '</td>' +
+          '</tr>';
+        tableBody.append(row); // Добавить новую строку в таблицу
+      });
+      updateLoadedRecordsCount();
+    }
+
+    // Функция для обновления скрытого поля с количеством загруженных записей
+    function updateLoadedRecordsCount() {
+      var loadedRecordsCount = $('#userData tbody tr').length;
+      $('#loadedRecords').val(loadedRecordsCount);
+    }
+
+    // Вызвать функцию для отправки AJAX-запроса и обновления таблицы при загрузке страницы
+    fetchUserData();
+  });
+
+  // Получаем ссылки на элементы ползунка и поля ввода
+  var rangeInput = document.getElementById('error_count');
+  var numberInput = document.getElementById('error_count_input');
+
+  // Обработчик события изменения значения ползунка
+  rangeInput.addEventListener('input', function() {
+    // Обновляем значение поля ввода
+    numberInput.value = rangeInput.value;
+  });
+
+  // Обработчик события изменения значения поля ввода
+  numberInput.addEventListener('input', function() {
+    // Обновляем значение ползунка
+    rangeInput.value = numberInput.value;
+  });
+
+  // Обработка изменения значений полей "город" и "ошибки"
+  document.getElementById('region').addEventListener('change', function() {
+    updateUserList();
+  });
+
+  document.getElementById('error_count').addEventListener('change', function() {
+    updateUserList();
+  });
+
+  function updateUserList() {
+    var region = document.getElementById('region').value;
+    var errorCount = document.getElementById('error_count').value;
+
+    // Отправляем запрос на сервер с обновленными параметрами
+    var xhr = new XMLHttpRequest();
+    xhr.onreadystatechange = function() {
+      if (xhr.readyState === XMLHttpRequest.DONE) {
+        if (xhr.status === 200) {
+          // Обновляем список пользователей на странице
+          var userList = JSON.parse(xhr.responseText).users;
+          // Обновляем пользовательский интерфейс с новыми данными userList
+        } else {
+          console.error('Ошибка при загрузке пользователей: ' + xhr.status);
+        }
+      }
+    };
+    xhr.open('GET', '/?region=' + region + '&error_count=' + errorCount, true);
+    xhr.send();
+  }
+
+$(document).ready(function() {
+    $('#exportCsvButton').click(function() {
+        // Собираем данные таблицы с пользователями
+        var userData = [];
+        $('#userData tbody tr').each(function() {
+            var user = {
+                id: $(this).find('td:eq(1)').text(),
+                name: $(this).find('td:eq(2)').text(),
+                address: $(this).find('td:eq(3)').text(),
+                phone: $(this).find('td:eq(4)').text()
+            };
+            userData.push(user);
+        });
+
+        // Проверяем, есть ли данные перед отправкой на сервер
+        if (userData.length === 0) {
+            console.error('Нет данных для экспорта в CSV');
+            return;
+        }
+
+        // Отправляем AJAX-запрос на сервер для экспорта в CSV
+        $.ajax({
+            url: '/export-to-csv', // URL вашего экспортного метода
+            method: 'POST',
+            data: JSON.stringify(userData),
+            contentType: 'application/json',
+            success: function(data, status, xhr) {
+                // Создаем ссылку для скачивания CSV-файла
+                var blob = new Blob([data], { type: 'text/csv' });
+                var url = window.URL.createObjectURL(blob);
+                var a = document.createElement('a');
+                a.href = url;
+                a.download = 'users.csv';
+                document.body.appendChild(a);
+                a.click();
+                window.URL.revokeObjectURL(url);
+                document.body.removeChild(a);
+            },
+            error: function(xhr, status, error) {
+                console.error('Ошибка при экспорте в CSV:', error);
+            }
+        });
+    });
+});
+
+</script>
+
+
+
+</body>
+
+</html>
