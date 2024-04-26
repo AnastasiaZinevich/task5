@@ -92,7 +92,7 @@
         background-color: #e9ecef;
     }
 
-    /* Стили для контейнера таблицы с фиксированной высотой и скроллом */
+   
     .scrollable {
         max-height: 400px;
         overflow-y: auto;
@@ -174,11 +174,11 @@
     </script>
 <script>
 $(document).ready(function() {
-    var fetchingData = false; // Переменная для отслеживания состояния запроса данных
-    var offset = 0; // Смещение для загрузки следующей порции записей
-    var limit = 10; // Лимит записей для каждой порции
+    var fetchingData = false; 
+    var offset = 0; 
+    var limit = 10; 
 
-    // Функция для обновления таблицы с данными
+    
     function updateTable(users) {
         var tableBody = $('#userData tbody');
         if (!tableBody.length) {
@@ -194,13 +194,13 @@ $(document).ready(function() {
                     '<td>' + user.address + '</td>' +
                     '<td>' + user.phone + '</td>' +
                     '</tr>';
-                tableBody.append(row); // Добавить новую строку в таблицу
+                tableBody.append(row); 
             });
-            offset += users.length; // Увеличить смещение на количество загруженных записей
+            offset += users.length; 
         } else {
-            // Если данных больше нет, можно скрыть скроллбар или добавить некоторый индикатор
+           
             $('#userData').css('overflow-y', 'hidden');
-            fetchingData = true; // Установить флаг, чтобы загрузка не происходила при последующих прокрутках
+            fetchingData = true; 
         }
     }
 
@@ -217,7 +217,7 @@ $(document).ready(function() {
 
             $.ajax({
                 type: 'GET',
-                url: '/', // Замените на URL-адрес контроллера Symfony
+                url: '/', 
                 data: formData,
                 success: function(response) {
                     updateTable(response.users);
@@ -231,12 +231,12 @@ $(document).ready(function() {
         }
     }
 
-    // Обработка прокрутки таблицы
+   
     $('#userData').scroll(function() {
         loadMoreData();
     });
 
-    // Загрузить первую порцию данных при загрузке страницы
+   
     loadMoreData();
 });
 
@@ -257,32 +257,32 @@ $(document).ready(function() {
     </script>
 <script>
   $(document).ready(function() {
-    // Обработка изменения значения в поле региона
+   
     $('#region').change(function() {
       var selectedRegion = $(this).val();
       var selectedLang = $(this).find(':selected').data('lang');
-      changeLanguage(selectedLang); // Изменить язык
-      fetchUserData(selectedRegion); // Запросить данные для выбранного региона
+      changeLanguage(selectedLang); 
+      fetchUserData(selectedRegion); 
     });
 
-    // Обработка изменения значений полей, отличных от региона
+    
     $('#generatorForm').find('input[type!="radio"], select').not('#region').on('input change', function() {
-      fetchUserData(); // Вызвать функцию для отправки AJAX-запроса и обновления таблицы
+      fetchUserData(); 
     });
 
-    // Обработка клика по кнопке "Random" для генерации случайного seed
+    
     $('#randomSeed').click(function() {
-      generateRandomSeed(); // Вызвать функцию для генерации случайного сида
-      fetchUserData(); // Вызвать функцию для отправки AJAX-запроса и обновления таблицы
+      generateRandomSeed();
+      fetchUserData(); 
     });
 
-    // Функция для генерации случайного сида
+    
     function generateRandomSeed() {
       var randomSeed = Math.floor(Math.random() * 1000000);
       $('#seed').val(randomSeed);
     }
 
-    // Функция для изменения языка
+   
     function changeLanguage(lang) {
       $.getJSON('/translations/' + lang + '.json', function(translations) {
         $('[data-translate]').each(function() {
@@ -295,18 +295,18 @@ $(document).ready(function() {
       });
     }
 
-    // Функция для отправки AJAX-запроса и обновления таблицы с данными
+   
     function fetchUserData(region) {
-      var formData = $('#generatorForm').serialize(); // Получить данные формы в виде строки
+      var formData = $('#generatorForm').serialize(); 
       if (region) {
-        formData += '&region=' + region; // Добавить выбранный регион в данные формы
+        formData += '&region=' + region; 
       }
       $.ajax({
         type: 'GET',
-        url: '/', // URL-адрес контроллера Symfony
-        data: formData, // Данные формы
+        url: '/', 
+        data: formData, 
         success: function(response) {
-          updateTable(response.users); // Обновить таблицу с данными
+          updateTable(response.users); 
         },
         error: function(xhr, status, error) {
           console.error('Ошибка при загрузке данных:', error);
@@ -314,10 +314,10 @@ $(document).ready(function() {
       });
     }
 
-    // Функция для обновления таблицы с данными
+   
     function updateTable(users) {
       var tableBody = $('#userData tbody');
-      tableBody.empty(); // Очистить текущие данные в таблице
+      tableBody.empty(); 
       $.each(users, function(index, user) {
         var row = '<tr>' +
           '<td>' + (index + 1) + '</td>' +
@@ -326,38 +326,38 @@ $(document).ready(function() {
           '<td data-translate="address">' + user.address + '</td>' +
           '<td data-translate="phone">' + user.phone + '</td>' +
           '</tr>';
-        tableBody.append(row); // Добавить новую строку в таблицу
+        tableBody.append(row);
       });
       updateLoadedRecordsCount();
     }
 
-    // Функция для обновления скрытого поля с количеством загруженных записей
+    
     function updateLoadedRecordsCount() {
       var loadedRecordsCount = $('#userData tbody tr').length;
       $('#loadedRecords').val(loadedRecordsCount);
     }
 
-    // Вызвать функцию для отправки AJAX-запроса и обновления таблицы при загрузке страницы
+    
     fetchUserData();
   });
 
-  // Получаем ссылки на элементы ползунка и поля ввода
+ 
   var rangeInput = document.getElementById('error_count');
   var numberInput = document.getElementById('error_count_input');
 
-  // Обработчик события изменения значения ползунка
+
   rangeInput.addEventListener('input', function() {
-    // Обновляем значение поля ввода
+ 
     numberInput.value = rangeInput.value;
   });
 
-  // Обработчик события изменения значения поля ввода
+
   numberInput.addEventListener('input', function() {
-    // Обновляем значение ползунка
+
     rangeInput.value = numberInput.value;
   });
 
-  // Обработка изменения значений полей "город" и "ошибки"
+
   document.getElementById('region').addEventListener('change', function() {
     updateUserList();
   });
@@ -370,12 +370,12 @@ $(document).ready(function() {
     var region = document.getElementById('region').value;
     var errorCount = document.getElementById('error_count').value;
 
-    // Отправляем запрос на сервер с обновленными параметрами
+    
     var xhr = new XMLHttpRequest();
     xhr.onreadystatechange = function() {
       if (xhr.readyState === XMLHttpRequest.DONE) {
         if (xhr.status === 200) {
-          // Обновляем список пользователей на странице
+         
           var userList = JSON.parse(xhr.responseText).users;
           // Обновляем пользовательский интерфейс с новыми данными userList
         } else {
@@ -389,7 +389,7 @@ $(document).ready(function() {
 
 $(document).ready(function() {
     $('#exportCsvButton').click(function() {
-        // Собираем данные таблицы с пользователями
+       
         var userData = [];
         $('#userData tbody tr').each(function() {
             var user = {
@@ -401,15 +401,15 @@ $(document).ready(function() {
             userData.push(user);
         });
 
-        // Проверяем, есть ли данные перед отправкой на сервер
+       
         if (userData.length === 0) {
             console.error('Нет данных для экспорта в CSV');
             return;
         }
 
-        // Отправляем AJAX-запрос на сервер для экспорта в CSV
+       
         $.ajax({
-            url: '/export-to-csv', // URL вашего экспортного метода
+            url: '/export-to-csv', 
             method: 'POST',
             data: JSON.stringify(userData),
             contentType: 'application/json',
