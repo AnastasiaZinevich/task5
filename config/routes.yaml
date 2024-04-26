@@ -20,4 +20,4 @@ homepage:
 export_to_csv:
     path: /export-to-csv
     controller: App\Controller\UserController::exportToCsv
-    methods: [GET, POST]  # Добавляем метод POST
+    methods: [GET, POST] 
